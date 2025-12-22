@@ -4,24 +4,26 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import model_validator
 from typing import Self
 
-dot_env_path = str(Path(__file__).parent.parent.parent / '.env')
+dot_env_path = str(Path(__file__).parent.parent / '.env')
 
 
 class MinioSettings(BaseSettings):
-    minio_access_key: str  # deprecated
-    minio_secret_key: str  # deprecated
-    minio_bucket_name: str
-    minio_endpoint: str
-    # minio_root_user: str
-    # minio_root_password: str
+    access_key: str
+    secret_key: str
+    bucket_name: str
+    root_user: str
+    root_password: str
+    port: int
+    port_secure: int
+    endpoint: str
 
 
 class PostgresSettings(BaseSettings):
-    postgres_host: str
-    postgres_port: int
-    postgres_db: str
-    postgres_user: str
-    postgres_password: str
+    host: str
+    port: int
+    db: str
+    user: str
+    password: str
 
     db_dsn: str = ''
     db_dsn_sync: str = ''
@@ -29,32 +31,31 @@ class PostgresSettings(BaseSettings):
     @model_validator(mode='after')
     def db_dsn_validate(self) -> Self:
         self.db_dsn = (f'postgresql+asyncpg://'
-                       f'{self.postgres_user}:{self.postgres_password}@'
-                       f'{self.postgres_host}:{self.postgres_port}/'
-                       f'{self.postgres_db}')
+                       f'{self.user}:{self.password}@'
+                       f'{self.host}:{self.port}/'
+                       f'{self.db}')
 
         self.db_dsn_sync = (f'postgresql+psycopg://'
-                            f'{self.postgres_user}:{self.postgres_password}@'
-                            f'{self.postgres_host}:{self.postgres_port}/'
-                            f'{self.postgres_db}')
+                            f'{self.user}:{self.password}@'
+                            f'{self.host}:{self.port}/'
+                            f'{self.db}')
         return self
 
 
-class KeycloakSettings(BaseSettings):
-    keycloak_base_url: str
-    keycloak_admin: str
-    keycloak_admin_password: str
+class TelegramSettings(BaseSettings):
+    bot_token: str
+    channel_id: str
+    channel_name: str
 
 
-class AttachmentsSettings(BaseSettings):
-    attachments_max_size: int
-    attachments_extensions: List[str]
+class AttachmentSettings(BaseSettings):
+    max_size: int
+    extensions: List[str]
 
 
-class JwtSettings(BaseSettings):
-    access_token_expire: int
-    algorithm: str
-    secret_key: str
+class AppSettings(BaseSettings):
+    static_path: str
+    templates_path: str
 
 
 class Settings(BaseSettings):
@@ -65,14 +66,14 @@ class Settings(BaseSettings):
     # PostgreSQL
     postgres: PostgresSettings
 
-    # Keycloak
-    keycloak: KeycloakSettings
+    # Telegram
+    telegram: TelegramSettings
 
     # Attachments
-    attachments: AttachmentsSettings
+    attachment: AttachmentSettings
 
-    # Jwt
-    jwt: JwtSettings
+    # App
+    app: AppSettings
 
     model_config = SettingsConfigDict(
         env_nested_delimiter='__',

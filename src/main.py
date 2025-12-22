@@ -1,3 +1,4 @@
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,6 +7,8 @@ from dependencies.exceptions_handlers import set_exceptions_handlers
 from user.routers.router import router as user_router
 from role.routers.router import router as role_router
 from auth.routers.router import router as auth_router
+from webpages.pages import router as web_router
+from config import settings
 
 
 def get_application(
@@ -72,6 +75,12 @@ def get_application(
     for router in other_routers:
         app.include_router(router)
 
+    app.mount(
+        "/static",
+        StaticFiles(directory=settings.app.static_path),
+        name="static"
+    )
+
     return app
 
 
@@ -80,6 +89,9 @@ app = get_application(
         role_router,
         user_router,
         auth_router,
+    ],
+    other_routers=[
+        web_router,
     ]
 )
 

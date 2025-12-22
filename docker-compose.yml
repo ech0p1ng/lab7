@@ -1,0 +1,61 @@
+services:
+  app:
+    container_name: app
+    build: 
+      dockerfile: ./Dockerfile
+      target: server # server - для продакшена, dev - для разработки
+      args:
+        - POETRY_VERSION=${POETRY_VERSION}
+    volumes:
+      - .env:/app/.env
+      - ./src:/app/src
+      - ./alembic:/app/alembic
+      - ./poetry.lock:/app/poetry.lock
+      - ./pyproject.toml:/app/pyproject.toml
+      - ./Dockerfile:/app/Dockerfile
+    ports:
+      - "8080:8080"
+      - "5678:5678"
+  
+    depends_on:
+      - db
+    env_file:
+      - .env
+  
+  db:
+    container_name: postgres_db
+    image: postgres
+    restart: always
+    ports:
+      - "${POSTGRES__PORT}:${POSTGRES__PORT}"
+    environment:
+      POSTGRES_HOST: ${POSTGRES__HOST}
+      POSTGRES_PORT: ${POSTGRES__PORT}
+      POSTGRES_DB: ${POSTGRES__DB}
+      POSTGRES_USER: ${POSTGRES__USER}
+      POSTGRES_PASSWORD: ${POSTGRES__PASSWORD}
+
+    env_file:
+      - .env
+
+  minio:
+    container_name: minio
+    image: minio/minio:latest
+    entrypoint: /bin/sh
+    command: -c "mkdir -p /data/private-bucket && minio server /data --console-address ':9001'"
+    ports:
+      - "${MINIO__PORT}:${MINIO__PORT}"
+      - "${MINIO__PORT_SECURE}:${MINIO__PORT_SECURE}"
+    env_file:
+      - .env
+    volumes:
+      - minio_data:/data
+    environment:
+      # MINIO_ROOT_USER: ${MINIO__ROOT_USER}
+      # MINIO_ROOT_PASSWORD: ${MINIO__ROOT_PASSWORD}
+      MINIO_ACCESS_KEY: ${MINIO__ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO__SECRET_KEY}
+
+
+volumes:
+  minio_data:

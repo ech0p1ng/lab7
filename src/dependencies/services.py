@@ -82,10 +82,10 @@ def minio_service() -> MinioService:
     '''
 
     return MinioService(
-        bucket_name=settings.minio.minio_bucket_name,
-        endpoint=settings.minio.minio_endpoint,
-        access_key=settings.minio.minio_access_key,
-        secret_key=settings.minio.minio_secret_key
+        bucket_name=settings.minio.bucket_name,
+        endpoint=settings.minio.endpoint,
+        access_key=settings.minio.access_key,
+        secret_key=settings.minio.secret_key
     )
 
 
