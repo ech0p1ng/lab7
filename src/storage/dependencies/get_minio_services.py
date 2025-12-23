@@ -6,8 +6,8 @@ minio_client = MinioService
 
 def get_minio_service() -> MinioService:
     return MinioService(
-        settings.minio.minio_bucket_name,
-        settings.minio.minio_endpoint,
-        settings.minio.minio_access_key,
-        settings.minio.minio_secret_key,
+        settings.minio.bucket_name,
+        settings.minio.endpoint,
+        settings.minio.access_key,
+        settings.minio.secret_key,
     )

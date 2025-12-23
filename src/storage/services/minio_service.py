@@ -112,10 +112,10 @@ class MinioService:
                 full_file_name)
             url = self.get_file_url(full_file_name)
 
-            if file_size > settings.attachments.attachments_max_size:
+            if file_size > settings.attachment.max_size:
                 raise FileIsTooLargeError(
                     "Максимальный размер файла - "
-                    f"{settings.attachments.attachments_max_size / 1024} Кбайт"
+                    f"{settings.attachment.max_size / 1024} Кбайт"
                 )
             else:
                 self.client.put_object(
@@ -153,4 +153,4 @@ class MinioService:
         Returns:
             str: URL файла в MinIO
         '''
-        return (f"{settings.minio.minio_endpoint}/{self.bucket_name}/{file_name}")
+        return (f"{settings.minio.endpoint}/{self.bucket_name}/{file_name}")

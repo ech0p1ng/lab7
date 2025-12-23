@@ -58,6 +58,12 @@ class AppSettings(BaseSettings):
     templates_path: str
 
 
+class JwtSettings(BaseSettings):
+    access_token_expire: int
+    algorithm: str
+    secret_key: str
+
+
 class Settings(BaseSettings):
 
     # MinIO
@@ -74,6 +80,9 @@ class Settings(BaseSettings):
 
     # App
     app: AppSettings
+
+    # JWT
+    jwt: JwtSettings
 
     model_config = SettingsConfigDict(
         env_nested_delimiter='__',
