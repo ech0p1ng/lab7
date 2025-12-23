@@ -1,8 +1,6 @@
 from config import settings
 from storage.services.minio_service import MinioService
 
-minio_client = MinioService
-
 
 def get_minio_service() -> MinioService:
     return MinioService(

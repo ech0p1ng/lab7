@@ -1,5 +1,5 @@
-from fastapi.staticfiles import StaticFiles
 import uvicorn
+from fastapi.staticfiles import StaticFiles
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -30,43 +30,43 @@ def get_application(
 
     origins = [
         # Локальные адреса для разработки
-        "http://localhost",
-        "http://localhost:80",
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://localhost:8080",
-        "http://127.0.0.1",
-        "http://127.0.0.1:80",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:8080",
-        "http://0.0.0.0",
-        "http://0.0.0.0:80",
-        "http://0.0.0.0:3000",
-        "http://0.0.0.0:5173",
-        "http://0.0.0.0:8080",
+        'http://localhost',
+        'http://localhost:80',
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'http://localhost:8080',
+        'http://127.0.0.1',
+        'http://127.0.0.1:80',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:5173',
+        'http://127.0.0.1:8080',
+        'http://0.0.0.0',
+        'http://0.0.0.0:80',
+        'http://0.0.0.0:3000',
+        'http://0.0.0.0:5173',
+        'http://0.0.0.0:8080',
 
         # Docker-адреса фронтенда
-        "http://education-bot-frontend-1",
-        "http://education-bot-frontend-1:80",
-        "http://education-bot-frontend-1:3000",
-        "http://education-bot-frontend-1:5173",
-        "http://education-bot-frontend-1:8080",
+        'http://education-bot-frontend-1',
+        'http://education-bot-frontend-1:80',
+        'http://education-bot-frontend-1:3000',
+        'http://education-bot-frontend-1:5173',
+        'http://education-bot-frontend-1:8080',
 
         # Docker-адреса бэкенда
-        "http://education-bot-app-1",
-        "http://education-bot-app-1:80",
-        "http://education-bot-app-1:3000",
-        "http://education-bot-app-1:5173",
-        "http://education-bot-app-1:8080",
+        'http://education-bot-app-1',
+        'http://education-bot-app-1:80',
+        'http://education-bot-app-1:3000',
+        'http://education-bot-app-1:5173',
+        'http://education-bot-app-1:8080',
     ]
 
     app.add_middleware(
         CORSMiddleware,
         allow_origins=['*'],
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=['*'],
+        allow_headers=['*'],
     )
 
     for router in api_routers:
@@ -76,9 +76,9 @@ def get_application(
         app.include_router(router)
 
     app.mount(
-        "/static",
+        '/static',
         StaticFiles(directory=settings.app.static_path),
-        name="static"
+        name='static'
     )
 
     return app
