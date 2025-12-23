@@ -26,7 +26,7 @@ header ul li {
     padding: 0;
 }
 
-a.button {
+button {
     background-color: var(--bg-new-layer);
     color: var(--text-colort);
     text-decoration: none;
@@ -37,7 +37,7 @@ a.button {
     display: block;
 }
 
-a.button:hover {
+button:hover {
     background-color: var(--bg-new-layer-hover);
     cursor: pointer;
 }

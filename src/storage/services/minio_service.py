@@ -11,7 +11,6 @@ import ssl
 import uuid
 
 
-
 class MinioService:
     def __init__(
         self,
@@ -127,7 +126,7 @@ class MinioService:
                 )
 
                 return AttachmentMinioSchema(
-                    minio_file_url='http://'+url,
+                    minio_file_url='http://' + url,
                     file_name=file_name,
                     file_extension=file_extension,
                     file_size=file_size

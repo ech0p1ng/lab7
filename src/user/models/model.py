@@ -14,18 +14,14 @@ class UserModel(BaseModel):
 
     Args:
         id (int): Идентификатор
-        first_name (str): Имя
-        last_name (str): Фамилия
-        middle_name (str): Отчество
+        user_name (str): Имя
         role (RoleModel): Роль
         groups (list[GroupModel]): группы, в которых состоит пользователь
         themes (list[ThemeModel]): темы, автором которых является пользователь
     '''
     __tablename__ = 'user'
     id: Mapped[int]
-    first_name: Mapped[str]  # имя
-    last_name: Mapped[str]  # фамилия
-    middle_name: Mapped[str]  # отчество
+    user_name: Mapped[str]  # имя
 
     role_id: Mapped[int] = mapped_column(ForeignKey('role.id'))
     role: Mapped['RoleModel'] = relationship(
@@ -42,17 +38,13 @@ class UserModel(BaseModel):
         if type(schema) is UserSchema:
             return cls(
                 id=schema.id,
-                first_name=schema.first_name,
-                last_name=schema.last_name,
-                middle_name=schema.middle_name,
+                user_name=schema.user_name,
                 role=RoleModel.from_schema(schema.role),
             )
         elif type(schema) is UserSimpleSchema:
             return cls(
                 id=schema.id,
-                first_name=schema.first_name,
-                last_name=schema.last_name,
-                middle_name=schema.middle_name,
+                user_name=schema.user_name,
                 role_id=schema.role_id
             )
         else:

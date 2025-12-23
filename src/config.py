@@ -75,7 +75,7 @@ class Settings(BaseSettings):
     # Telegram
     telegram: TelegramSettings
 
-    # Attachments
+    # Attachment
     attachment: AttachmentSettings
 
     # App
