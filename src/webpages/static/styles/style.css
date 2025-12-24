@@ -1,6 +1,18 @@
 body {
     margin: 0;
     padding: 0;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    --transition: background-color 0.3s ease-in-out;
+    --border-radius: 10px;
+    --gap: 10px;
+    --padding-big: 10px;
+    --padding-small: 5px;
+    --margin-big: 10px;
+    --margin-small: 5px;
+    --input-height: 30px;
+    --font-size-default: 11pt;
+    --font-size-big: 16pt;
+    font-size: var(--font-size-default);
 }
 
 header {
@@ -8,16 +20,16 @@ header {
     width: 100%;
     display: flex;
     align-items: center;
-    padding: 5px 0;
+    padding: var(--padding-small) 0;
 }
 
 header ul {
     list-style: none;
     margin: 0;
-    padding: 0 5px;
+    padding: 0 var(--padding-small);
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: var(--gap);
 }
 
 header ul li {
@@ -26,18 +38,40 @@ header ul li {
     padding: 0;
 }
 
-button {
+.button {
     background-color: var(--bg-new-layer);
     color: var(--text-colort);
     text-decoration: none;
-    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-    border-radius: 5px;
-    padding: 5px 10px;
-    transition: background-color 0.3s ease-in-out;
+    border: none;
+    border-radius: var(--border-radius);
+    /* padding: var(--padding-small) var(--padding-big); */
+    padding: 0 var(--padding-big);
+    height: var(--input-height) !important;
     display: block;
+    transition: var(--transition);
+    text-align: center;
+    align-items: center;
+    align-content: center;
+    font-size: var(--font-size-default);
 }
 
-button:hover {
+.button:hover {
     background-color: var(--bg-new-layer-hover);
     cursor: pointer;
+    transition: var(--transition);
+}
+
+.input {
+    background-color: var(--bg-new-layer);
+    border: none;
+    border-radius: var(--border-radius);
+    height: var(--input-height) !important;
+    padding: 0 var(--padding-small);
+    margin: 0;
+}
+
+.form-title {
+    text-align: center;
+    font-size: var(--font-size-big);
+    margin: var(--margin-small) 0 var(--margin-small) 0;
 }

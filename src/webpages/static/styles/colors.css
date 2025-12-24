@@ -13,6 +13,6 @@ body {
     --yellow: rgba(255, 255, 0, 0.6);
     --secondary-text-color: rgba(0, 0, 0, 0.6);
 
-    --bg-new-layer: rgba(0, 0, 0, 0.1);
-    --bg-new-layer-hover: rgba(0, 0, 0, 0.2);
+    --bg-new-layer: rgba(0, 0, 0, 0.05);
+    --bg-new-layer-hover: rgba(0, 0, 0, 0.1);
 }

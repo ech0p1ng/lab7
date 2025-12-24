@@ -13,5 +13,5 @@ const header = $(`
 
 $(window).on('load', () => {
     $('body').prepend(header);
-    $(window).trigger('html_loaded');
+    $(window).trigger('html-loaded');
 });
