@@ -11,6 +11,14 @@ const header = $(`
     </header>
 `);
 
+function goto_mainpage() {
+    window.location.href = '/';
+}
+
+function goto_page(page_url) {
+    window.location.href = page_url;
+}
+
 $(window).on('load', () => {
     $('body').prepend(header);
     $(window).trigger('html-loaded');

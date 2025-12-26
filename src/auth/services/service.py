@@ -7,6 +7,8 @@ from exceptions.exception import BadCredentialsError, NotFoundError
 from user.models.model import UserModel
 from user.services.service import UserService
 import uuid
+from auth.schemas.token import JwtToken
+
 
 http_bearer = HTTPBearer()
 
@@ -104,7 +106,7 @@ class AuthService:
             jwt_uuid = str(payload.get(AuthService.UUID_KEY))
             return (user_id, role_id, jwt_uuid)
 
-    async def get_token(self, user_id: int) -> dict[str, str]:
+    async def get_token(self, user_id: int) -> JwtToken:
         '''
         Получить JWT-токен по id пользователя
 
@@ -115,7 +117,7 @@ class AuthService:
             NotFoundError: Не удалось найти пользователя по id
 
         Returns:
-            dict[str, str]: Словарь с ключами `access_token` и `token_type` \
+            JwtToken: Словарь с ключами `access_token` и `token_type` \
                 и значениями токена и `bearer` соответственно
 
         Example:
@@ -131,8 +133,8 @@ class AuthService:
             access_token = await self.__create_token(user.id)
         except NotFoundError as nfe:
             raise nfe
-
-        return {
-            'access_token': access_token,
-            'token_type': 'bearer'
-        }
+        return JwtToken(access_token=access_token)
+        # return {
+        #     'access_token': access_token,
+        #     'token_type': 'bearer'
+        # }

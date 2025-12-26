@@ -4,7 +4,7 @@ ARG POETRY_VERSION
 
 WORKDIR /app
 
-COPY /backend .
+COPY . .
 
 ENV POETRY_VIRTUALENVS_CREATE=false \
     POETRY_NO_INTERACTION=1
@@ -14,8 +14,9 @@ RUN mkdir -p /root/.cache/pypoetry/virtualenvs && \
 RUN pip install --upgrade pip
 RUN pip install poetry==${POETRY_VERSION}
 RUN poetry env use /usr/local/bin/python
-RUN poetry install --no-root
 RUN chmod +x /app/fill_db.sh
+RUN poetry install --no-root
+
 
 FROM base AS server
 
@@ -25,11 +26,3 @@ RUN chmod +x /app/entrypoint.sh
 
 ENTRYPOINT ["/app/entrypoint.sh"]
 
-
-FROM base AS dev
-
-ENV PYTHONPATH=/app/src
-
-RUN chmod +x /app/entrypoint-dev.sh
-
-ENTRYPOINT ["/app/entrypoint-dev.sh"]

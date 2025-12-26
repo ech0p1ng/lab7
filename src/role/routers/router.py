@@ -34,9 +34,10 @@ async def get_role(
 async def add_role(
     role_data: RoleSimpleSchema,
     role_service: RoleService = Depends(role_service),
-    permission_allowed: bool = Depends(check_permission(
-        endpoint_name='api_roles_post',
-    ))
+    # TODO: Подумать над пермишенами
+    # permission_allowed: bool = Depends(check_permission(
+    #     endpoint_name='api_roles_post',
+    # ))
 ) -> Any:
     model = RoleModel.from_schema(role_data)
     created_model = await role_service.create(model)
@@ -66,9 +67,10 @@ async def get_roles(
 async def update_role(
     role_data: RoleSchema,
     service: RoleService = Depends(role_service),
-    permission_allowed: bool = Depends(check_permission(
-        endpoint_name='api_roles_patch',
-    ))
+    # TODO: Подумать над пермишенами
+    # permission_allowed: bool = Depends(check_permission(
+    #     endpoint_name='api_roles_patch',
+    # ))
 ) -> Any:
     return await service.update(
         model=RoleModel.from_schema(role_data),

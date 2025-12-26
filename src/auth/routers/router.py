@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends
 from dependencies.services import auth_service, user_service
 from auth.services.service import AuthService
-from auth.schemas.schema import AuthSchema
 from user.services.service import UserService
-from user.schemas.schema import UserSchema, UserSimpleSchema
+from user.schemas.schema import UserSchema, UserSimpleSchema, UserAuthSchema
 from user.models.model import UserModel
 from dependencies.auth import get_current_user
+from auth.schemas.token import JwtToken
 
 
 router = APIRouter(prefix='/auth', tags=['Аутентификация'])
@@ -15,12 +15,15 @@ router = APIRouter(prefix='/auth', tags=['Аутентификация'])
     path='/login',
     summary='Вход',
     description='Вход. Получение JWT-токена по данным пользователя',
+    response_model=JwtToken
 )
 async def get_token(
-    user_data: AuthSchema,
-    auth_service: AuthService = Depends(auth_service)
+    user_data: UserAuthSchema,
+    auth_service: AuthService = Depends(auth_service),
+    user_service: UserService = Depends(user_service)
 ):
-    return await auth_service.get_token(user_data.id)
+    user = user_service.get({'name': user_data.user_name})
+    return await auth_service.get_token(user.id)
 
 
 @router.get(
@@ -37,9 +40,10 @@ async def get_me(current_user: UserModel = Depends(get_current_user)):
     path='/registration',
     summary='Регистрация',
     description='Регистрация',
+    response_model=JwtToken
 )
 async def registration(
-    user_data: UserSimpleSchema,
+    user_data: UserAuthSchema,
     user_service: UserService = Depends(user_service),
     auth_service: AuthService = Depends(auth_service)
 ):

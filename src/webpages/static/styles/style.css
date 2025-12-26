@@ -40,7 +40,7 @@ header ul li {
 
 .button {
     background-color: var(--bg-new-layer);
-    color: var(--text-colort);
+    color: var(--text-color);
     text-decoration: none;
     border: none;
     border-radius: var(--border-radius);
@@ -53,6 +53,10 @@ header ul li {
     align-items: center;
     align-content: center;
     font-size: var(--font-size-default);
+}
+
+a {
+    color: var(--text-color);
 }
 
 .button:hover {

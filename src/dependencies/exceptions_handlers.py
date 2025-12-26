@@ -1,3 +1,5 @@
+import json
+from typing import Any
 from fastapi.exceptions import FastAPIError
 from fastapi import FastAPI, HTTPException, Request, status, Response
 from exceptions.exception import (
@@ -5,15 +7,24 @@ from exceptions.exception import (
     WasNotCreatedError, FileIsTooLargeError, BadCredentialsError
 )
 
-
 def set_exceptions_handlers(app: FastAPI) -> FastAPI:
+    def generate_response(detail: str, status_code: int, headers: dict[str, Any] | None = None) -> Response:
+        return Response(
+            content=str(json.dumps({
+                'status_code': status_code,
+                'detail': detail,
+            })),
+            status_code=status_code,
+            headers=headers
+        )
+
     @app.exception_handler(NotFoundError)
     async def not_found_error_handler(
         request: Request,
         exception: NotFoundError
     ) -> Response:
-        return Response(
-            content=str(exception),
+        return generate_response(
+            detail=str(exception),
             status_code=status.HTTP_404_NOT_FOUND
         )
 
@@ -22,8 +33,8 @@ def set_exceptions_handlers(app: FastAPI) -> FastAPI:
         request: Request,
         exception: AlreadyExistsError
     ) -> Response:
-        return Response(
-            content=str(exception),
+        return generate_response(
+            detail=str(exception),
             status_code=status.HTTP_400_BAD_REQUEST
         )
 
@@ -32,8 +43,8 @@ def set_exceptions_handlers(app: FastAPI) -> FastAPI:
         request: Request,
         exception: ForbiddenError
     ) -> Response:
-        return Response(
-            content=str(exception),
+        return generate_response(
+            detail=str(exception),
             status_code=status.HTTP_403_FORBIDDEN
         )
 
@@ -42,8 +53,8 @@ def set_exceptions_handlers(app: FastAPI) -> FastAPI:
         request: Request,
         exception: WasNotCreatedError
     ) -> Response:
-        return Response(
-            content=str(exception),
+        return generate_response(
+            detail=str(exception),
             status_code=status.HTTP_400_BAD_REQUEST
         )
 
@@ -52,8 +63,8 @@ def set_exceptions_handlers(app: FastAPI) -> FastAPI:
         request: Request,
         exception: FileIsTooLargeError
     ) -> Response:
-        return Response(
-            content=str(exception),
+        return generate_response(
+            detail=str(exception),
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
         )
 
@@ -62,8 +73,8 @@ def set_exceptions_handlers(app: FastAPI) -> FastAPI:
         request: Request,
         exception: BadCredentialsError
     ) -> Response:
-        return Response(
-            content=str(exception),
+        return generate_response(
+            detail=str(exception),
             status_code=status.HTTP_401_UNAUTHORIZED
         )
 
@@ -71,8 +82,8 @@ def set_exceptions_handlers(app: FastAPI) -> FastAPI:
     async def unauthorized_error_handler(
         request: Request,
         exception: UnauthorizedError
-    ) -> HTTPException:
-        raise HTTPException(
+    ) -> Response:
+        return generate_response(
             detail=str(exception),
             status_code=status.HTTP_401_UNAUTHORIZED,
             headers={'WWW-Authenticate': 'Bearer'}
@@ -85,8 +96,8 @@ def set_exceptions_handlers(app: FastAPI) -> FastAPI:
     ) -> Response:
         if isinstance(exception, FastAPIError):
             raise exception
-        return Response(
-            content='Internal server error',
+        return generate_response(
+            detail='Internal server error',
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
