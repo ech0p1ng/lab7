@@ -28,6 +28,7 @@ async function sign_up(user_name, password) {
 
 async function registration(user_name, password) {
     data = {
+        'role_id': 2,
         'user_name': user_name,
         'password': password
     }
