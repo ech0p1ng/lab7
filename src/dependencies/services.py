@@ -1,4 +1,5 @@
 from fastapi import Depends
+from analytics.services.service import AnalyticsService
 from db.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from attachment.services.service import AttachmentService
@@ -123,3 +124,13 @@ def permission_service(
         endpoint_service(db),
         role_service(db)
     )
+
+
+def analytics_service() -> AnalyticsService:
+    '''
+    Получить объект класса бизнес-логики сервиса аналитики
+
+    Returns:
+        AnalyticsService: Сервис аналитики
+    '''
+    return AnalyticsService(minio_service())

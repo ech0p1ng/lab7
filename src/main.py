@@ -7,8 +7,14 @@ from dependencies.exceptions_handlers import set_exceptions_handlers
 from user.routers.router import router as user_router
 from role.routers.router import router as role_router
 from auth.routers.router import router as auth_router
+from analytics.routers.router import router as analytics_router
 from webpages.pages import router as web_router
 from config import settings
+
+import debugpy
+
+debugpy.listen(("0.0.0.0", 5678))
+# debugpy.wait_for_client()  # опционально
 
 
 def get_application(
@@ -89,6 +95,7 @@ app = get_application(
         role_router,
         user_router,
         auth_router,
+        analytics_router,
     ],
     other_routers=[
         web_router,

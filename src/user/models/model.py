@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Mapped, relationship, mapped_column
 from sqlalchemy import ForeignKey
 from base.model import BaseModel
-from user.schemas.schema import UserSchema, UserSimpleSchema, UserAuthSchema
+from user.schemas.schema import UserSchema, UserSimpleSchema, UserAuthSchema, UserRegistrationSchema
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -33,7 +33,7 @@ class UserModel(BaseModel):
     @classmethod
     def from_schema(
         cls,
-        schema: UserSchema | UserSimpleSchema | UserAuthSchema
+        schema: UserSchema | UserSimpleSchema | UserAuthSchema | UserRegistrationSchema
     ) -> 'UserModel':
         from role.models.model import RoleModel
         if type(schema) is UserSchema:
@@ -54,6 +54,12 @@ class UserModel(BaseModel):
             return cls(
                 user_name=schema.user_name,
                 password=schema.password,
+            )
+        elif type(schema) is UserRegistrationSchema:
+            return cls(
+                user_name=schema.user_name,
+                password=schema.password,
+                role_id=schema.role_id
             )
         else:
             return cls()

@@ -9,6 +9,9 @@ from exceptions.exception import FileIsTooLargeError, WasNotCreatedError
 import os
 import ssl
 import uuid
+import aiohttp
+import aiofiles
+from pathlib import Path
 
 
 class MinioService:
@@ -153,3 +156,23 @@ class MinioService:
             str: URL файла в MinIO
         '''
         return (f"{settings.minio.endpoint}/{self.bucket_name}/{file_name}")
+
+    async def download_file(self, url: str, filename: str) -> None:
+        '''
+        Асинхронная загрузка файла
+
+        Args:
+            url (str): URL-файла
+            filename (str): Имя файла
+        '''
+        file = Path(filename)
+        parent = file.parent.absolute()
+        parent.mkdir(parents=True, exist_ok=True)
+        if file.exists():
+            file.unlink(True)
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get('http://' + url) as response:
+                async with aiofiles.open(filename, 'wb') as f:
+                    async for chunk in response.content.iter_chunked(1024):
+                        await f.write(chunk)

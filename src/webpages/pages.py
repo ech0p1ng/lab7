@@ -27,3 +27,7 @@ async def about_page(request: Request):
 @router.get('/register')
 async def register_page(request: Request):
     return templates.TemplateResponse('register.html', {'request': request})
+
+@router.get('/sign-in')
+async def sign_in(request: Request):
+    return templates.TemplateResponse('sign-in.html', {'request': request})

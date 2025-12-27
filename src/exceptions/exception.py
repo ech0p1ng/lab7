@@ -1,51 +1,61 @@
-class NotFoundError(Exception):
-    '''
-    Ошибка, которая выбрасывается в случае, \
-        если не удалось найти что-либо
-    '''
-    pass
+from typing import Any
+from fastapi import status
 
 
-class AlreadyExistsError(Exception):
-    '''
-    Ошибка, которая выбрасывается в случае, \
-        если что-либо уже существует и не должно иметь дубликатов
-    '''
-    pass
+class AppException(Exception):
+    status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR
+    detail: str = "Internal server error"
+    headers: dict[str, Any] | None = None
+
+    def __init__(self, detail: str | None = None):
+        if detail:
+            self.detail = detail
 
 
-class ForbiddenError(Exception):
+class NotFoundError(AppException):
+    '''
+    Ошибка, которая выбрасывается в случае, если не удалось найти что-либо
+    '''
+    status_code = status.HTTP_404_NOT_FOUND
+
+
+class AlreadyExistsError(AppException):
+    '''
+    Ошибка, которая выбрасывается в случае, если что-либо уже существует и не должно иметь дубликатов
+    '''
+    status_code = status.HTTP_400_BAD_REQUEST
+
+
+class ForbiddenError(AppException):
     '''Ошибка, которая выбрасывается в случае, запрета доступа'''
-    pass
+    status_code = status.HTTP_403_FORBIDDEN
 
 
-class WasNotCreatedError(Exception):
+class WasNotCreatedError(AppException):
     '''
-    Ошибка, которая выбрасывается в случае, \
-        если что-либо не было создано по какой-либо причине
+    Ошибка, которая выбрасывается в случае, если что-либо не было создано по какой-либо причине
     '''
-    pass
+    status_code = status.HTTP_400_BAD_REQUEST
 
 
-class FileIsTooLargeError(Exception):
+class FileIsTooLargeError(AppException):
     '''
-    Ошибка, которая выбрасывается в случае, \
-        если файл слишком большой
+    Ошибка, которая выбрасывается в случае, если файл слишком большой
     '''
-    pass
+    status_code = status.HTTP_413_CONTENT_TOO_LARGE
 
 
-class UnauthorizedError(Exception):
+class UnauthorizedError(AppException):
     '''
-    Ошибка, которая выбрасывается в случае, \
-        если пользователь неавторизован
+    Ошибка, которая выбрасывается в случае, если пользователь неавторизован
     '''
-    pass
+    status_code = status.HTTP_401_UNAUTHORIZED
+    headers = {"WWW-Authenticate": "Bearer"}
 
 
-class BadCredentialsError(Exception):
+class BadCredentialsError(AppException):
     '''
-    Ошибка, которая выбрасывается в случае, \
-        если данные для авторизации невалидны
+    Ошибка, которая выбрасывается в случае, если данные для авторизации невалидны
     '''
-    pass
+    status_code = status.HTTP_401_UNAUTHORIZED
+    headers = {"WWW-Authenticate": "Bearer"}

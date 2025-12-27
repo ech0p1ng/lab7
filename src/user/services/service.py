@@ -1,4 +1,5 @@
 from typing import Any
+from exceptions.exception import NotFoundError
 from user.repositories.repository import UserRepository
 from base.service import BaseService
 from user.models.model import UserModel
@@ -83,5 +84,12 @@ class UserService(BaseService[UserModel]):
             NotFoundError: Не удалось найти роль
             AlreadyExistsError: Пользователь уже существует
         '''
-        await self.role_service.exists({"id": model.role_id})
+        user_filter = {"user_name": model.user_name}
+        role_filter = {"id": model.role_id}
+        user_exists = await self.exists(user_filter)
+        role_exists = await self.role_service.exists(role_filter)
+        if user_exists:
+            raise NotFoundError(f'Пользователь с {user_filter} уже существует')
+        if not role_exists:
+            raise NotFoundError(f'Роль с {role_filter} не найдена')
         return await super().create(model)

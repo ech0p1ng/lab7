@@ -14,8 +14,19 @@ class UserAuthSchema(BaseSimpleSchema):
     user_name: str = Field(min_length=2, max_length=32)
     password: str = Field(min_length=8, max_length=32)
 
+class UserRegistrationSchema(UserAuthSchema):
+    '''
+    Pydantic-модель регистрации пользователя
 
-class UserSimpleSchema(BaseSchema, UserAuthSchema):
+    Args:
+        user_name (str): Имя
+        password (str): Пароль
+        role_id (int): ID роли пользователя
+    '''
+    role_id: int = Field(gt=0)
+
+
+class UserSimpleSchema(BaseSchema, UserRegistrationSchema):
     '''
     Упрощенаня pydantic-модель пользователя
 
@@ -25,8 +36,7 @@ class UserSimpleSchema(BaseSchema, UserAuthSchema):
         password (str): Пароль
         role_id (int): Идентификатор роли
     '''
-    role_id: int = Field(gt=0)
-
+    pass
 
 class UserSchema(BaseSchema, UserAuthSchema):
     '''
@@ -38,6 +48,4 @@ class UserSchema(BaseSchema, UserAuthSchema):
         password (str): Пароль
         role (RoleSchema): Роль
     '''
-    id: int = Field(gt=0)
-    user_name: str = Field(min_length=2, max_length=32)
     role: RoleSchema
