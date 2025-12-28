@@ -46,3 +46,4 @@ function show_errors(detail) {
     alert(messages);
     console.log(messages)
 }
+

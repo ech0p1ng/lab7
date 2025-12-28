@@ -4,8 +4,8 @@ function capitalize(str) {
 }
 
 function setUserData(user_name, role_name) {
-    $('#user-name').html('Вы не авторизованы!');
-    $('#role-name').html('Вы не авторизованы!');
+    $('#user-name').html(user_name);
+    $('#role-name').html(user_name);
 }
 
 async function getMe() {

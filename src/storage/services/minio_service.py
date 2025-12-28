@@ -6,6 +6,7 @@ from urllib3 import PoolManager, disable_warnings
 from attachment.schemas.schema import AttachmentMinioSchema
 from config import settings
 from exceptions.exception import FileIsTooLargeError, WasNotCreatedError
+from storage.services.service import StorageService
 import os
 import ssl
 import uuid
@@ -21,7 +22,10 @@ class MinioService:
         endpoint: str,
         access_key: str,
         secret_key: str,
+        storage_service: StorageService
     ):
+        self.storage_service = storage_service
+
         context = ssl.create_default_context()
         context.options |= ssl.OP_NO_SSLv3 | ssl.OP_NO_SSLv2
 
@@ -53,24 +57,6 @@ class MinioService:
             }
         )
         self.client.set_bucket_policy(self._bucket_name, __policy)
-
-    @classmethod
-    def __split_file_name(cls, full_file_name: str) -> tuple[str, str]:
-        '''
-        Разделение полного имени файла на имя файла и его расширение
-
-        Args:
-            full_file_name (str): Полное имя файла с расширением
-
-        Returns:
-            tuple[str,str]: Первый объект - имя файла, \
-                второй - расширение файла
-        '''
-        splitted = full_file_name.split(".")
-        extension = splitted[-1]
-        splitted.remove(extension)
-        file_name = ".".join(splitted)
-        return (file_name, extension)
 
     def __ensure_bucket_exists(self):
         '''
@@ -110,7 +96,7 @@ class MinioService:
         try:
             full_file_name = f"{uuid.uuid4()}-{file.filename}"
             file_size = os.fstat(file.file.fileno()).st_size
-            file_name, file_extension = MinioService.__split_file_name(
+            file_name, file_extension = self.storage_service.split_file_name(
                 full_file_name)
             url = self.get_file_url(full_file_name)
 
@@ -135,7 +121,7 @@ class MinioService:
                     file_size=file_size
                 )
         except S3Error as exc:
-            raise WasNotCreatedError(exc)
+            raise WasNotCreatedError(str(exc))
 
     @property
     def client(self) -> Minio:
@@ -156,23 +142,3 @@ class MinioService:
             str: URL файла в MinIO
         '''
         return (f"http://{settings.minio.endpoint}/{self.bucket_name}/{file_name}")
-
-    async def download_file(self, url: str, filename: str) -> None:
-        '''
-        Асинхронная загрузка файла
-
-        Args:
-            url (str): URL-файла
-            filename (str): Имя файла
-        '''
-        file = Path(filename)
-        parent = file.parent.absolute()
-        parent.mkdir(parents=True, exist_ok=True)
-        if file.exists():
-            file.unlink(True)
-
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                async with aiofiles.open(filename, 'wb') as f:
-                    async for chunk in response.content.iter_chunked(1024):
-                        await f.write(chunk)

@@ -1,5 +1,6 @@
-import numpy as np
 import pandas as pd
+import numpy as np
+from typing import Any
 from sklearn.metrics import (
     accuracy_score,
     precision_score,
@@ -17,14 +18,16 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
-from logger import logger
+
 from storage.services.minio_service import MinioService
-from typing import Any
-from pathlib import Path
+from storage.services.service import StorageService
+
 
 class AnalyticsService:
-    def __init__(self, minio_service: MinioService) -> None:
+    def __init__(self, minio_service: MinioService, storage_service: StorageService) -> None:
         self.minio_service = minio_service
+        self.storage_service = storage_service
+        self.file_name = 'temp/train_data_fixed.csv'
 
     def __save_csv(self, df: pd.DataFrame, path: str) -> None:
         csv_save_kwargs = {
@@ -35,11 +38,10 @@ class AnalyticsService:
 
         return df.to_csv(path, **csv_save_kwargs)  # type: ignore
 
-    async def __load_csv(self, url: str) -> pd.DataFrame:
-        file_name = url.split('/')[-1]
+    async def load_csv(self, file_path: str) -> pd.DataFrame:
+        file_name = file_path.split('/')[-1]
         file_url = self.minio_service.get_file_url(file_name)
-        file_path = str(Path(f'temp/{file_name}').absolute())
-        await self.minio_service.download_file(
+        await self.storage_service.download_file(
             url=file_url,
             filename=file_path
         )
@@ -126,9 +128,7 @@ class AnalyticsService:
         return (fpr, tpr, roc_auc, model_name)
 
     async def analyze(self) -> dict[str, Any]:
-        file_name = 'temp/train_data_fixed.csv'
-
-        df = await self.__load_csv(file_name)
+        df = await self.load_csv(self.file_name)
         X_train, X_test, y_train, y_test = self._train_test_split(df)
 
         models = [
@@ -143,7 +143,6 @@ class AnalyticsService:
 
         scores = []
         confusion_matrixes: list[pd.DataFrame] = []
-        roc_data = []
         for model in models:
             predicted = self.apply_model(model, X_train, X_test, y_train)  # type: ignore
             model_name = type(model).__name__

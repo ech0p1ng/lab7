@@ -8,7 +8,9 @@ from auth.services.service import AuthService
 from endpoint.services.service import EndpointService
 from permission.services.service import PermissionService
 from user.services.service import UserService
+from info.services.service import InfoService
 from storage.services.minio_service import MinioService
+from storage.services.service import StorageService
 from config import settings
 
 
@@ -86,7 +88,8 @@ def minio_service() -> MinioService:
         bucket_name=settings.minio.bucket_name,
         endpoint=settings.minio.endpoint,
         access_key=settings.minio.access_key,
-        secret_key=settings.minio.secret_key
+        secret_key=settings.minio.secret_key,
+        storage_service=storage_service()
     )
 
 
@@ -133,4 +136,24 @@ def analytics_service() -> AnalyticsService:
     Returns:
         AnalyticsService: Сервис аналитики
     '''
-    return AnalyticsService(minio_service())
+    return AnalyticsService(minio_service(), storage_service())
+
+
+def info_service() -> InfoService:
+    '''
+    Получить объект класса бизнес-логики сервиса общей информации
+
+    Returns:
+        InfoService: Сервис общей информации
+    '''
+    return InfoService(minio_service(), storage_service(), analytics_service())
+
+
+def storage_service() -> StorageService:
+    '''
+    Получить объект класса бизнес-логики сервиса файлов
+
+    Returns:
+        InfoService: Сервис файлов
+    '''
+    return StorageService()

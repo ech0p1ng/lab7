@@ -9,6 +9,7 @@ from role.routers.router import router as role_router
 from auth.routers.router import router as auth_router
 from analytics.routers.router import router as analytics_router
 from webpages.pages import router as web_router
+from info.routers.router import router as info_router
 from config import settings
 
 import debugpy
@@ -96,6 +97,7 @@ app = get_application(
         user_router,
         auth_router,
         analytics_router,
+        info_router,
     ],
     other_routers=[
         web_router,

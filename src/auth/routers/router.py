@@ -6,7 +6,6 @@ from user.schemas.schema import UserSchema, UserSimpleSchema, UserAuthSchema, Us
 from user.models.model import UserModel
 from dependencies.auth import get_current_user
 from auth.schemas.token import JwtToken
-from logger import logger
 
 router = APIRouter(prefix='/auth', tags=['Аутентификация'])
 
