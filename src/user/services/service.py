@@ -86,8 +86,8 @@ class UserService(BaseService[UserModel]):
         '''
         user_filter = {"user_name": model.user_name}
         role_filter = {"id": model.role_id}
-        user_exists = await self.exists(user_filter)
-        role_exists = await self.role_service.exists(role_filter)
+        user_exists = await self.exists(user_filter, raise_exc=False)
+        role_exists = await self.role_service.exists(role_filter, raise_exc=False)
         if user_exists:
             raise NotFoundError(f'Пользователь с {user_filter} уже существует')
         if not role_exists:

@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   app:
     container_name: app
@@ -16,6 +14,7 @@ services:
       # - ./poetry.lock:/app/poetry.lock
       - ./pyproject.toml:/app/pyproject.toml
       - ./Dockerfile:/app/Dockerfile
+      - ./temp:/app/temp
     ports:
       - "8080:8080"
       - "5678:5678"

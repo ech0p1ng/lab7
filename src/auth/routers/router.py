@@ -26,16 +26,6 @@ async def get_token(
     return await auth_service.get_token(user.id)
 
 
-@router.get(
-    path='/me',
-    summary='Получить данные о себе',
-    description='Получить данные о себе',
-    response_model=UserSchema
-)
-async def get_me(current_user: UserModel = Depends(get_current_user)):
-    return current_user
-
-
 @router.post(
     path='/registration',
     summary='Регистрация',

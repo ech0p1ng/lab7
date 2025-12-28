@@ -83,6 +83,16 @@ async def delete_user(
 
 
 @router.get(
+    path='/me',
+    summary='Получить данные о себе',
+    description='Получить данные о себе',
+    response_model=UserSchema
+)
+async def get_me(current_user: UserModel = Depends(get_current_user)):
+    return current_user
+
+
+@router.get(
     path='/{user_id}',
     summary='Получение пользователя',
     description=('Получение пользователя. '

@@ -20,7 +20,7 @@ from sklearn.model_selection import train_test_split
 from logger import logger
 from storage.services.minio_service import MinioService
 from typing import Any
-
+from pathlib import Path
 
 class AnalyticsService:
     def __init__(self, minio_service: MinioService) -> None:
@@ -38,9 +38,10 @@ class AnalyticsService:
     async def __load_csv(self, url: str) -> pd.DataFrame:
         file_name = url.split('/')[-1]
         file_url = self.minio_service.get_file_url(file_name)
+        file_path = str(Path(f'temp/{file_name}').absolute())
         await self.minio_service.download_file(
             url=file_url,
-            filename=file_name
+            filename=file_path
         )
 
         csv_load_kwargs = {
@@ -48,7 +49,7 @@ class AnalyticsService:
             'encoding': 'utf-8',
         }
 
-        return pd.read_csv(url, **csv_load_kwargs)  # type: ignore
+        return pd.read_csv(file_path, **csv_load_kwargs)  # type: ignore
 
     def _train_test_split(self, df: pd.DataFrame) -> list:
         X = df.drop(columns=['relevance'])

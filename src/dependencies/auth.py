@@ -14,7 +14,7 @@ async def get_current_user(
     Получить пользователя по его JWT-токену
 
     Args:
-        token (str): JWT-токен
+        credentials (HTTPAuthorizationCredentials): JWT-токен
         auth_service (AuthService): Сервис аутентификации
 
     Returns:

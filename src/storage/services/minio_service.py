@@ -155,7 +155,7 @@ class MinioService:
         Returns:
             str: URL файла в MinIO
         '''
-        return (f"{settings.minio.endpoint}/{self.bucket_name}/{file_name}")
+        return (f"http://{settings.minio.endpoint}/{self.bucket_name}/{file_name}")
 
     async def download_file(self, url: str, filename: str) -> None:
         '''
@@ -172,7 +172,7 @@ class MinioService:
             file.unlink(True)
 
         async with aiohttp.ClientSession() as session:
-            async with session.get('http://' + url) as response:
+            async with session.get(url) as response:
                 async with aiofiles.open(filename, 'wb') as f:
                     async for chunk in response.content.iter_chunked(1024):
                         await f.write(chunk)
