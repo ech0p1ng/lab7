@@ -11,7 +11,7 @@ services:
       - ./src:/app/src
       - ./alembic:/app/alembic
       - ./alembic.ini:/app/alembic.ini
-      # - ./poetry.lock:/app/poetry.lock
+      - ./poetry.lock:/app/poetry.lock
       - ./pyproject.toml:/app/pyproject.toml
       - ./Dockerfile:/app/Dockerfile
       - ./temp:/app/temp

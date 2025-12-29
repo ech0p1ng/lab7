@@ -37,6 +37,7 @@ async function getItem(item_name, header, format_as = 'text', query_params_str =
             value = table('', response);
         }
         $('#' + item_name + ' .item').html(value);
+        TRAIN_DATA_OFFSET += TRAIN_DATA_LIMIT;
     }
     catch (xhr) {
         show_errors(xhr.responseJSON);

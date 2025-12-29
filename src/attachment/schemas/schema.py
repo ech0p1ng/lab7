@@ -22,13 +22,14 @@ class AttachmentMinioSchema(AttachmentSimpleSchema):
         прикрепляемого к теме с URL файла в MinIO
 
     Args:
-        minio_file_url (str | None): Ссылка на файл в MinIO
+        minio_public_file_url (str | None): Ссылка на файл в MinIO для пользования клиента
+        minio_private_file_url (str | None): Ссылка на файл в MinIO для пользования внутри приложения
         file_name (str): Имя файла
         file_extension (str): Расширение файла
         file_size (int): Размер файла (байт)
     '''
-
-    minio_file_url: str | None
+    minio_public_file_url: str | None
+    minio_private_file_url: str | None
 
 
 class AttachmentSchema(AttachmentMinioSchema):

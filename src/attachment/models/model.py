@@ -64,7 +64,7 @@ class AttachmentModel(BaseModel):
         '''
         if type(schema) is AttachmentSchema:
             return cls(
-                minio_file_url=schema.minio_file_url,
+                minio_file_url=schema.minio_public_file_url,
                 file_name=schema.file_name,
                 file_extension=schema.file_extension,
                 file_size=schema.file_size,
@@ -73,7 +73,7 @@ class AttachmentModel(BaseModel):
             return cls(
                 tg_msg_id=tg_msg_id,
                 tg_file_url=tg_file_url,
-                minio_file_url=schema.minio_file_url,
+                minio_file_url=schema.minio_public_file_url,
                 file_name=schema.file_name,
                 file_extension=schema.file_extension,
                 file_size=schema.file_size,

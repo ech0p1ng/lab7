@@ -1,6 +1,6 @@
 function table(table_name, data) {
     let $wrapper = $(`
-        <div style="margin-bottom: 20px;">
+        <div table_name="${table_name}"style="margin-bottom: 20px;">
             <h4>${table_name}</h4>
             <table border="1">
                 <thead></thead>

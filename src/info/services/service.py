@@ -25,7 +25,7 @@ class InfoService:
     async def get_subject_area(self) -> str:
         subject_area_file_name = self.subject_area_file_name.split('/')[-1]
         await self.storage_service.download_file(
-            self.minio_service.get_file_url(subject_area_file_name),
+            self.minio_service.get_file_url_for_private(subject_area_file_name),
             self.subject_area_file_name
         )
         return await self.storage_service.read_file(self.subject_area_file_name)
@@ -33,7 +33,7 @@ class InfoService:
     async def get_target_attribute(self) -> str:
         target_attribute_file_name = self.target_attribute_file_name.split('/')[-1]
         await self.storage_service.download_file(
-            self.minio_service.get_file_url(target_attribute_file_name),
+            self.minio_service.get_file_url_for_private(target_attribute_file_name),
             self.target_attribute_file_name
         )
         return await self.storage_service.read_file(self.target_attribute_file_name)

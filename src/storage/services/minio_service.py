@@ -1,18 +1,18 @@
-import json
-from fastapi import File, UploadFile
-from minio import Minio
-from minio.error import S3Error
-from urllib3 import PoolManager, disable_warnings
-from attachment.schemas.schema import AttachmentMinioSchema
-from config import settings
-from exceptions.exception import FileIsTooLargeError, WasNotCreatedError
-from storage.services.service import StorageService
-import os
 import ssl
+import json
 import uuid
-import aiohttp
-import aiofiles
-from pathlib import Path
+import asyncio
+from io import BytesIO
+from minio import Minio
+from config import settings
+from datetime import timedelta
+from minio.error import S3Error
+from fastapi import File, UploadFile
+from urllib3 import PoolManager, disable_warnings
+
+from storage.services.service import StorageService
+from attachment.schemas.schema import AttachmentMinioSchema
+from exceptions.exception import FileIsTooLargeError, WasNotCreatedError
 
 
 class MinioService:
@@ -74,13 +74,17 @@ class MinioService:
 
     async def upload_file(
         self,
-        file: UploadFile = File(...)
+        file: BytesIO,
+        file_name: str,
+        file_ext: str
     ) -> AttachmentMinioSchema:
         '''
         Загрузка файла в MinIO
 
         Args:
-            file (UploadFile): Загружаемый файл
+            file (BytesIO): Загружаемый файл
+            file_name (str): Имя файла
+            file_ext (str): Расширение файла без точки
 
         Returns:
             AttachmentMinioSchema: Упрощенная Pydantic-схема медиа-контента, \
@@ -94,11 +98,12 @@ class MinioService:
         self.__ensure_bucket_exists()
 
         try:
-            full_file_name = f"{uuid.uuid4()}-{file.filename}"
-            file_size = os.fstat(file.file.fileno()).st_size
-            file_name, file_extension = self.storage_service.split_file_name(
-                full_file_name)
-            url = self.get_file_url(full_file_name)
+            full_file_name = f'{uuid.uuid4()}-{file_name}.{file_ext}'
+            file.seek(0)
+            file_size = file.getbuffer().nbytes
+
+            public_url = self.get_file_url_for_public(full_file_name)
+            private_url = self.get_file_url_for_private(full_file_name)
 
             if file_size > settings.attachment.max_size:
                 raise FileIsTooLargeError(
@@ -106,22 +111,53 @@ class MinioService:
                     f"{settings.attachment.max_size / 1024} Кбайт"
                 )
             else:
-                self.client.put_object(
+                await asyncio.to_thread(
+                    self.client.put_object,
                     self.bucket_name,
                     full_file_name,
-                    file.file,
+                    file,
                     file_size,
-                    content_type=str(file.content_type)
+                    # content_type=str(file.content_type)
                 )
 
                 return AttachmentMinioSchema(
-                    minio_file_url='http://' + url,
-                    file_name=file_name,
-                    file_extension=file_extension,
+                    minio_public_file_url=public_url,
+                    minio_private_file_url=private_url,
+                    file_name=str(file_name),
+                    file_extension=file_ext,
                     file_size=file_size
                 )
         except S3Error as exc:
             raise WasNotCreatedError(str(exc))
+
+    async def upload_file_from_form(
+        self,
+        file: UploadFile = File(...)
+    ) -> AttachmentMinioSchema:
+        '''
+        Загрузка файла из запроса в MinIO
+
+        Args:
+            file (UploadFile): Загружаемый файл
+
+        Returns:
+            AttachmentMinioSchema: Упрощенная Pydantic-схема медиа-контента, \
+            прикрепляемого к теме с URL файла в MinIO
+
+        Raises:
+            FileIsTooLargeError: Размер файла превышает допустимый
+            WasNotCreatedError: Не удалось загрузить файл в MinIO
+            Exception: Прочие ошибки, связаныне с MinIO
+        '''
+        full_file_name = file.filename or 'img.png'
+        file_ext = full_file_name.split('.')[-1]
+        file_name = full_file_name.replace(file_ext, '')
+        __file = BytesIO(await file.read())
+        return await self.upload_file(
+            __file,
+            file_name,
+            file_ext
+        )
 
     @property
     def client(self) -> Minio:
@@ -131,7 +167,7 @@ class MinioService:
     def bucket_name(self) -> str:
         return self._bucket_name
 
-    def get_file_url(self, file_name: str) -> str:
+    def get_file_url_for_private(self, file_name: str) -> str:
         '''
         Получение URL файла в MinIO
 
@@ -141,4 +177,7 @@ class MinioService:
         Returns:
             str: URL файла в MinIO
         '''
-        return (f"http://{settings.minio.endpoint}/{self.bucket_name}/{file_name}")
+        return f'http://{settings.minio.endpoint}/{settings.minio.bucket_name}/{file_name}'
+
+    def get_file_url_for_public(self, file_name: str) -> str:
+        return f'http://{settings.minio.ip_address}:{settings.minio.port}/{settings.minio.bucket_name}/{file_name}'
