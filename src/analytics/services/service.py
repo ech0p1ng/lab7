@@ -18,6 +18,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
+from pathlib import Path
+import asyncio
 
 from storage.services.minio_service import MinioService
 from storage.services.service import StorageService
@@ -40,7 +42,7 @@ class AnalyticsService:
 
     async def load_csv(self, file_path: str) -> pd.DataFrame:
         file_name = file_path.split('/')[-1]
-        file_url = self.minio_service.get_file_url(file_name)
+        file_url = self.minio_service.get_file_url_for_private(file_name)
         await self.storage_service.download_file(
             url=file_url,
             filename=file_path
@@ -51,7 +53,8 @@ class AnalyticsService:
             'encoding': 'utf-8',
         }
 
-        return pd.read_csv(file_path, **csv_load_kwargs)  # type: ignore
+        df = await asyncio.to_thread(pd.read_csv, file_path, **csv_load_kwargs)  # type: ignore
+        return df  # type: ignore
 
     def _train_test_split(self, df: pd.DataFrame) -> list:
         X = df.drop(columns=['relevance'])
@@ -118,13 +121,17 @@ class AnalyticsService:
         self,
         y_test: np.ndarray,
         y_pred: np.ndarray,
-        model_name: str
+        model_name: str,
+        save_path: str | None = None
     ) -> tuple:
         fpr, tpr, _ = roc_curve(y_test, y_pred)
         roc_auc = auc(fpr, tpr)
         plt.plot(fpr, tpr)
         plt.title(f'{model_name} (AUC = {roc_auc:.4f})')
-        plt.show()
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        else:
+            plt.show()
         return (fpr, tpr, roc_auc, model_name)
 
     async def analyze(self) -> dict[str, Any]:
@@ -143,13 +150,23 @@ class AnalyticsService:
 
         scores = []
         confusion_matrixes: list[pd.DataFrame] = []
+        graphs = dict()
         for model in models:
             predicted = self.apply_model(model, X_train, X_test, y_train)  # type: ignore
             model_name = type(model).__name__
-            self._roc_curve(y_test, predicted, model_name)
+
+            file_name = f'{model_name}_roc_curve'
+            file_ext = 'png'
+            save_path = f'temp/{file_name}.{file_ext}'
+            Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+            self._roc_curve(y_test, predicted, model_name, save_path)
+
+            file = await self.storage_service.read_file_as_bytes(save_path)
+            schema = await self.minio_service.upload_file(file, file_name, file_ext)
+            graphs[model_name] = schema.minio_public_file_url
             scores.append({
                 **self.calc_scores(y_test, predicted),
-                'model': model_name
+                'model': model_name,
             })
 
             confusion_matrixes.append(self._confusion_matrix(y_test, predicted))
@@ -157,14 +174,17 @@ class AnalyticsService:
         results = []
 
         for i, c in enumerate(confusion_matrixes):
+            model_name = type(models[i]).__name__
             results.append({
-                'method': type(models[i]).__name__,
-                'matrix': c.to_dict()
+                'method': model_name,
+                'matrix': c.to_dict(),
+                'roc_curve': graphs[model_name]
             })
         return {
             'table': {
                 'name': 'Оценка ошибки классификации',
                 'data': pd.DataFrame(scores).to_dict()
             },
-            'confussion_matrixes': results
+            'confussion_matrixes': results,
+            'graphs': graphs
         }

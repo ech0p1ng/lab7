@@ -35,7 +35,7 @@ class AttachmentService(BaseService[AttachmentModel]):
         uploaded_attachments = []
         for file in files:
             try:
-                attachment_schema = await self.minio_service.upload_file(file)
+                attachment_schema = await self.minio_service.upload_file_from_form(file)
             except S3Error as exc:
                 raise WasNotCreatedError(f'MinIO: {exc}')
             except FileIsTooLargeError as exc:

@@ -1,6 +1,7 @@
 from pathlib import Path
 import aiohttp
 import aiofiles
+from io import BytesIO
 
 
 class StorageService:
@@ -45,5 +46,9 @@ class StorageService:
                         await f.write(chunk)
 
     async def read_file(self, file_path: str, encoding="utf-8") -> str:
-        async with aiofiles.open(file_path, mode="r", encoding=encoding) as f:
+        async with aiofiles.open(file_path, "r", encoding=encoding) as f:
             return await f.read()
+
+    async def read_file_as_bytes(self, file_path: str) -> BytesIO:
+        async with aiofiles.open(file_path, "rb") as f:
+            return BytesIO(await f.read())

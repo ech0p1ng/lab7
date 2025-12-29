@@ -5,7 +5,7 @@ function capitalize(str) {
 
 function setUserData(user_name, role_name) {
     $('#user-name').html(user_name);
-    $('#role-name').html(user_name);
+    $('#role-name').html(role_name);
 }
 
 async function getMe() {
