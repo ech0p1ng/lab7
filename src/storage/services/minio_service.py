@@ -1,0 +1,144 @@
+import json
+from fastapi import File, UploadFile
+from minio import Minio
+from minio.error import S3Error
+from urllib3 import PoolManager, disable_warnings
+from attachment.schemas.schema import AttachmentMinioSchema
+from config import settings
+from exceptions.exception import FileIsTooLargeError, WasNotCreatedError
+from storage.services.service import StorageService
+import os
+import ssl
+import uuid
+import aiohttp
+import aiofiles
+from pathlib import Path
+
+
+class MinioService:
+    def __init__(
+        self,
+        bucket_name: str,
+        endpoint: str,
+        access_key: str,
+        secret_key: str,
+        storage_service: StorageService
+    ):
+        self.storage_service = storage_service
+
+        context = ssl.create_default_context()
+        context.options |= ssl.OP_NO_SSLv3 | ssl.OP_NO_SSLv2
+
+        disable_warnings()
+
+        self._client = Minio(
+            endpoint,
+            access_key=access_key,
+            secret_key=secret_key,
+            secure=False,
+            http_client=PoolManager(
+                cert_reqs="CERT_NONE"
+            )
+        )
+
+        self._bucket_name = bucket_name
+
+        __policy = json.dumps(
+            {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Principal": "*",
+                        "Action": ["s3:GetObject"],
+                        "Resource": [f"arn:aws:s3:::{self._bucket_name}/*"]
+                    }
+                ]
+            }
+        )
+        self.client.set_bucket_policy(self._bucket_name, __policy)
+
+    def __ensure_bucket_exists(self):
+        '''
+        Проверка существования MinIO Bucket. \
+            В случае, если не существует, создает его
+
+        Raises:
+            S3Error: Ошибка MinIO
+        '''
+        try:
+            if not self.client.bucket_exists(self.bucket_name):
+                self.client.make_bucket(self.bucket_name)
+        except S3Error as e:
+            raise e
+
+    async def upload_file(
+        self,
+        file: UploadFile = File(...)
+    ) -> AttachmentMinioSchema:
+        '''
+        Загрузка файла в MinIO
+
+        Args:
+            file (UploadFile): Загружаемый файл
+
+        Returns:
+            AttachmentMinioSchema: Упрощенная Pydantic-схема медиа-контента, \
+            прикрепляемого к теме с URL файла в MinIO
+
+        Raises:
+            FileIsTooLargeError: Размер файла превышает допустимый
+            WasNotCreatedError: Не удалось загрузить файл в MinIO
+            Exception: Прочие ошибки, связаныне с MinIO
+        '''
+        self.__ensure_bucket_exists()
+
+        try:
+            full_file_name = f"{uuid.uuid4()}-{file.filename}"
+            file_size = os.fstat(file.file.fileno()).st_size
+            file_name, file_extension = self.storage_service.split_file_name(
+                full_file_name)
+            url = self.get_file_url(full_file_name)
+
+            if file_size > settings.attachment.max_size:
+                raise FileIsTooLargeError(
+                    "Максимальный размер файла - "
+                    f"{settings.attachment.max_size / 1024} Кбайт"
+                )
+            else:
+                self.client.put_object(
+                    self.bucket_name,
+                    full_file_name,
+                    file.file,
+                    file_size,
+                    content_type=str(file.content_type)
+                )
+
+                return AttachmentMinioSchema(
+                    minio_file_url='http://' + url,
+                    file_name=file_name,
+                    file_extension=file_extension,
+                    file_size=file_size
+                )
+        except S3Error as exc:
+            raise WasNotCreatedError(str(exc))
+
+    @property
+    def client(self) -> Minio:
+        return self._client
+
+    @property
+    def bucket_name(self) -> str:
+        return self._bucket_name
+
+    def get_file_url(self, file_name: str) -> str:
+        '''
+        Получение URL файла в MinIO
+
+        Args:
+            file_name (str): Полное имя файла
+
+        Returns:
+            str: URL файла в MinIO
+        '''
+        return (f"http://{settings.minio.endpoint}/{self.bucket_name}/{file_name}")

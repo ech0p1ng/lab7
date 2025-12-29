@@ -1,0 +1,18 @@
+body {
+    --bg-body: rgb(255, 255, 255);
+    --bg-color: rgb(223, 223, 223);
+    --bg-opacity: rgba(223, 223, 223, 0.4);
+    --bg-main-opacity: rgba(223, 223, 223, 0);
+    --bg-no-opacity: rgb(223, 223, 223);
+    --border-color: rgb(234, 234, 234);
+    --text-color: black;
+    --text-dark-color: gray;
+    --text-bright-color: white;
+    --red: rgba(255, 0, 0, 0.6);
+    --green: rgba(0, 255, 0, 0.6);
+    --yellow: rgba(255, 255, 0, 0.6);
+    --secondary-text-color: rgba(0, 0, 0, 0.6);
+
+    --bg-new-layer: rgba(0, 0, 0, 0.05);
+    --bg-new-layer-hover: rgba(0, 0, 0, 0.1);
+}

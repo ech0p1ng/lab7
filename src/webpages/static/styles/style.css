@@ -1,0 +1,89 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    --transition: background-color 0.3s ease-in-out;
+    --border-radius: 10px;
+    --gap: 10px;
+    --padding-big: 10px;
+    --padding-small: 5px;
+    --margin-big: 10px;
+    --margin-small: 5px;
+    --input-height: 30px;
+    --font-size-default: 11pt;
+    --font-size-big: 16pt;
+    font-size: var(--font-size-default);
+}
+
+header {
+    background-color: var(--bg-new-layer);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: var(--padding-small) 0;
+}
+
+main {
+    padding: var(--padding-small);
+}
+
+header ul {
+    list-style: none;
+    margin: 0;
+    padding: 0 var(--padding-small);
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+}
+
+header ul li {
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+
+.button {
+    background-color: var(--bg-new-layer);
+    color: var(--text-color);
+    text-decoration: none;
+    border: none;
+    border-radius: var(--border-radius);
+    /* padding: var(--padding-small) var(--padding-big); */
+    padding: 0 var(--padding-big);
+    height: var(--input-height) !important;
+    display: block;
+    transition: var(--transition);
+    text-align: center;
+    align-items: center;
+    align-content: center;
+    font-size: var(--font-size-default);
+}
+
+a {
+    color: var(--text-color);
+}
+
+.button:hover {
+    background-color: var(--bg-new-layer-hover);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.input {
+    background-color: var(--bg-new-layer);
+    border: none;
+    border-radius: var(--border-radius);
+    height: var(--input-height) !important;
+    padding: 0 var(--padding-small);
+    margin: 0;
+}
+
+.form-title {
+    text-align: center;
+    font-size: var(--font-size-big);
+    margin: var(--margin-small) 0 var(--margin-small) 0;
+}
+
+.code-format {
+    font-family: Consolas, "Courier New", monospace;
+}
